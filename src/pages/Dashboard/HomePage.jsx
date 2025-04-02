@@ -73,7 +73,7 @@ const HomePage = () => {
       let formData = new FormData()
       formData.append("userId", localStorage.getItem("uId"))
       formData.append("amount", sendData.amount)
-      formData.append("paymentMethod",method)
+      formData.append("paymentMethod", method)
       formData.append("deliveryMode", sendData.deliveryMode)
       formData.append("reciverAccountNumber", sendData.reciverAccountNumber)
       formData.append("reciverCity", sendData.reciverCity)
@@ -81,8 +81,8 @@ const HomePage = () => {
       formData.append("reciverOtherInfo", JSON.stringify({ name: sendData.name, email: sendData.email }));
 
       let res = await axios.post(`${config.baseUrl}/transfer/create`, formData)
-      if(res.data){
-        if (res.data && method==="stripe") {
+      if (res.data) {
+        if (res.data && method === "stripe") {
           toast.dismiss(loader)
           window.location.href = stripeRes.data?.url;
         }
@@ -163,7 +163,7 @@ const HomePage = () => {
           <p>Money Remittance</p>
         </div>
 
-        <div onClick={() => { setSelectRecieptModel(true) }} className="mt-5 rounded-2xl bg-[#E3FAFF] p-3 w-[20rem]">
+        <div onClick={() => { setSelectRecieptModel(true) }} className="mt-5 rounded-2xl bg-[#E3FAFF] p-3 w-[20rem] cursor-pointer">
           <h1 className="text-xl font-medium">Send Money</h1>
           <p className="text-sm text-[#5895A8AA] mt-3">Send money to the philliphines anytime anywhere</p>
           <div className="mt-[2rem] flex justify-between items-center text-[2rem]">
@@ -178,29 +178,16 @@ const HomePage = () => {
 
           <div className="flex items-center gap-x-3 flex-wrap">
 
-            <div className="mt-3 rounded-2xl bg-[#E3FAFF] p-3">
-              <h1 className="text-xl font-medium">Track your Package</h1>
-              <div className="mt-[1rem] flex justify-between items-center text-[2rem]">
-                <GoPackageDependencies />
-                <MdArrowOutward />
+            <Link to={"/dashboard/wallet"}>
+              <div className="mt-3 rounded-2xl bg-[#FF3A2F] p-3">
+                <h1 className="text-xl font-medium">Transaction history</h1>
+                <div className="mt-[1rem] flex justify-between items-center text-[2rem]">
+                  <MdOutlineManageHistory />
+                  <MdArrowOutward />
+                </div>
               </div>
-            </div>
+            </Link>
 
-            <div className="mt-3 rounded-2xl bg-[#FE8E3C] p-3">
-              <h1 className="text-xl font-medium">Cash For Life</h1>
-              <div className="mt-[1rem] flex justify-between items-center text-[2rem]">
-                <SiCashapp />
-                <MdArrowOutward />
-              </div>
-            </div>
-
-            <div className="mt-3 rounded-2xl bg-[#FF3A2F] p-3">
-              <h1 className="text-xl font-medium">Transaction history</h1>
-              <div className="mt-[1rem] flex justify-between items-center text-[2rem]">
-                <MdOutlineManageHistory />
-                <MdArrowOutward />
-              </div>
-            </div>
 
           </div>
 
@@ -387,12 +374,12 @@ const HomePage = () => {
 
 
 
-            <button onClick={()=>handleSendMoney("stripe")} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Pay Via Card</button>
+            <button onClick={() => handleSendMoney("stripe")} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Pay Via Card</button>
 
 
             <p className="text-center">Or</p>
-            
-            <button onClick={()=>handleSendMoney("zelle")} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Pay Via Zele</button>
+
+            <button onClick={() => handleSendMoney("zelle")} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Pay Via Zele</button>
 
             <p className="mb-1">Zelle Email: sales.015@kpretservicellc.com</p>
             <p className="mb-1">Payablle To: KPS RETAIL LLC (CH)</p>
