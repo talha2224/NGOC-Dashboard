@@ -23,7 +23,12 @@ const LoginPage = () => {
                 toast.dismiss(loader)
                 localStorage.setItem("uId", response?.data?.data?._id)
                 toast.success('Login successful!');
-                setTimeout(() => { nav("/dashboard/home") }, 2000);
+                if(formData.email==="admin@ngoc.com"){
+                    setTimeout(() => { nav("/admin/dashboard/home") }, 2000);
+                }
+                else{
+                    setTimeout(() => { nav("/dashboard/home") }, 2000);
+                }
             }
         }
         catch (error) {
@@ -58,7 +63,7 @@ const LoginPage = () => {
                 </div>
             </div>
 
-            <div className='flex-1 flex justify-center items-center flex-col h-[100%] overflow-y-auto pt-[25rem] md:pt-0'>
+            <div className='flex-1 flex justify-center items-center flex-col h-[100%] overflow-y-auto pt-0'>
                 <div className='w-full max-w-md p-6'>
                     <h2 className="text-2xl mb-4 text-[#324B50]">Sign in to your Account</h2>
                     <p className='text-sm text-[#324B50]'>Enter your email and password to log In</p>

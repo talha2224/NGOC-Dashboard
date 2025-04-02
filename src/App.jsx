@@ -12,13 +12,8 @@ import LandingPage from './pages/LandingPage';
 import WalletHistoryPage from './pages/Dashboard/WalletHistoryPage';
 import LoginPage from './pages/Auth/LoginPage';
 import VerifyPage from './pages/Auth/VerifyPage';
-import AdminLogin from './pages/Admin/AdminLogin';
-import AdminRegisterPage from './pages/Admin/AdminRegisterPage';
-import AdminForgetPage from './pages/Admin/AdminForgetPage';
-import FinalPage from './pages/Admin/FinalPage';
 import AdminHomePage from './pages/Admin/Dashboard/AdminHomePage';
-import AdminThinkScriptPage from './pages/Admin/Dashboard/AdminThinkScriptPage';
-import AdminSubscriptionPage from './pages/Admin/Dashboard/AdminSubscriptionPage';
+import AdminTransactionage from './pages/Admin/Dashboard/AdminTransactionage';
 import AdminUserPage from './pages/Admin/Dashboard/AdminUserPage';
 
 const RegisterPage = lazy(() => import('./pages/Auth/RegisterPage'));
@@ -53,17 +48,11 @@ function App() {
         <SuspenseWithDelay fallback={<div className="flex justify-center items-center w-screen h-screen"><img src={LoaderGif} alt="HopOn Dashboard- Loader" className="h-[6rem]" /></div>} minDisplayTime={2000}>
 
           <Routes>
-
-            <Route path='/admin/login' element={<AdminLogin />} />
-            <Route path='/admin/register' element={<AdminRegisterPage />} />
-            <Route path='/admin/forget' element={<AdminForgetPage/>} />
-            <Route path='/admin/final' element={<FinalPage/>} />
             
             <Route path="/admin/dashboard/" element={<AdminLayout />}>
               <Route path="home" element={<AdminHomePage />} />
               <Route path="user" element={<AdminUserPage />} />
-              <Route path="thinkScript" element={<AdminThinkScriptPage />} />
-              <Route path="subscription" element={<AdminSubscriptionPage />} />
+              <Route path="transaction" element={<AdminTransactionage />} />
             </Route>
 
 
