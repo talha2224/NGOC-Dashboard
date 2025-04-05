@@ -29,7 +29,7 @@ const HomePage = () => {
   const [selectDeliveryMethod, setSelectDeliveryMethod] = useState(false);
   const [recieptDetailsModel, setRecieptDetailsModel] = useState(false)
 
-  const [sendData, setSendData] = useState({ amount: 0, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", name: "", email: "", existingScript: false })
+  const [sendData, setSendData] = useState({ amount: 0, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", reciverAddress: "", reciverPhone: "", name: "", email: "", existingScript: false,bankName:""})
 
 
 
@@ -69,7 +69,7 @@ const HomePage = () => {
     let loader = toast.loading("Processing Request")
     try {
       console.log(sendData)
-      let stripeRes = await axios.post(`https://ngoc-backend.vercel.app/create-checkout-session`, { amount: sendData.amount })
+      let stripeRes = await axios.post(`https://ngoc-backend.vercel.app/create-checkout-session`, { amount:(sendData.amount + (sendData.amount / 100) * 1.5).toFixed(2)})
       let formData = new FormData()
       formData.append("userId", localStorage.getItem("uId"))
       formData.append("amount", sendData.amount)
@@ -78,7 +78,7 @@ const HomePage = () => {
       formData.append("reciverAccountNumber", sendData.reciverAccountNumber)
       formData.append("reciverCity", sendData.reciverCity)
       formData.append("reciverCountry", sendData.reciverCountry)
-      formData.append("reciverOtherInfo", JSON.stringify({ name: sendData.name, email: sendData.email }));
+      formData.append("reciverOtherInfo", JSON.stringify({ name: sendData.name, email: sendData.email,bankName:sendData?.bankName,address:sendData.reciverAddress,phone:sendData.reciverPhone }));
 
       let res = await axios.post(`${config.baseUrl}/transfer/create`, formData)
       if (res.data) {
@@ -246,9 +246,9 @@ const HomePage = () => {
             <h2 className="mb-4">Who are you sending to ?</h2>
             <div onClick={() => { setSelectRecieptModel(false); setSelectAmoutModel(true) }} className="flex items-center justify-center gap-x-3 bg-[#E3FAFF] text-sm py-2 rounded-md cursor-pointer">
               <FaUserTie />
-              <p>Send to a new reciept</p>
+              <p>Send to a new receiver</p>
             </div>
-            <h2 className="my-4">Recent Reciept</h2>
+            <h2 className="my-4">Recent Receiver</h2>
             <div className="mt-3">
               {
                 recieptData?.map((i) => {
@@ -288,7 +288,7 @@ const HomePage = () => {
             <h2 className="">You Send</h2>
             <input onChange={(e) => { setSendData({ ...sendData, amount: e.target.value }) }} type="number" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border my-2 px-3 outline-none" placeholder="Enter Amount In USD" />
             <h2 className="">They Recieve</h2>
-            <input disabled type="number" value={sendData.amount != 0 ? sendData.amount - 2 : sendData.amount} name="" id="" className="w-[100%] h-[2.5rem] rounded-md border my-2 px-3 disabled:" placeholder="Enter Amount In USD" />
+            <input disabled type="number" value={sendData.amount} name="" id="" className="w-[100%] h-[2.5rem] rounded-md border my-2 px-3 disabled:" placeholder="Enter Amount In USD" />
             <div className="bg-[#E3FAFF] text-sm p-2 rounded-md">
               <p>Summary</p>
               <div className="flex justify-between items-center my-2">
@@ -301,7 +301,7 @@ const HomePage = () => {
               </div>
               <div className="flex justify-between items-center my-2">
                 <p>Total Amount</p>
-                <p>{sendData.amount} USD</p>
+                {sendData.amount} USD + ${((sendData.amount / 100) * 1.5).toFixed(2)} fees
               </div>
             </div>
             <button onClick={() => { setSelectAmoutModel(false); setSelectDeliveryMethod(true) }} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Continue</button>
@@ -364,11 +364,15 @@ const HomePage = () => {
                 :
 
                 <div>
-                  <input onChange={(e) => { setSendData({ ...sendData, name: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Reciept Name" />
-                  <input onChange={(e) => { setSendData({ ...sendData, email: e.target.value }) }} type="email" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Reciept Email" />
-                  <input onChange={(e) => { setSendData({ ...sendData, reciverCountry: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Reciept Country" />
-                  <input onChange={(e) => { setSendData({ ...sendData, reciverCity: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Reciept City" />
-                  <input onChange={(e) => { setSendData({ ...sendData, reciverAccountNumber: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Reciept Account Number" />
+                  <input onChange={(e) => { setSendData({ ...sendData, name: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Name" />
+                  <input onChange={(e) => { setSendData({ ...sendData, email: e.target.value }) }} type="email" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Email" />
+                  <input onChange={(e) => { setSendData({ ...sendData, reciverCountry: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Country" />
+                  <input onChange={(e) => { setSendData({ ...sendData, reciverCity: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver City" />
+                  {sendData?.deliveryMode =="Bank Deposit" && <input onChange={(e) => { setSendData({ ...sendData, bankName: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Bank Name" />}
+                  {sendData?.deliveryMode =="Home Delivery" && <input onChange={(e) => { setSendData({ ...sendData, reciverAddress: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Receiver Address" />}
+                  {sendData?.deliveryMode =="Home Delivery" && <input onChange={(e) => { setSendData({ ...sendData, reciverPhone: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Receiver Phone Number" />}
+
+                  <input onChange={(e) => { setSendData({ ...sendData, reciverAccountNumber: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Account Number" />
                 </div>
             }
 
@@ -380,10 +384,11 @@ const HomePage = () => {
             <p className="text-center">Or</p>
 
             <button onClick={() => handleSendMoney("zelle")} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Pay Via Zele</button>
-
-            <p className="mb-1">Zelle Email: sales.015@kpretservicellc.com</p>
-            <p className="mb-1">Payablle To: KPS RETAIL LLC (CH)</p>
+            <p className="mb-1">Zelle Phone: 7202264972</p>
+            <p className="mb-1">Payablle To: Ngoc Anh Services</p>
+            {/* <p className="mb-1">Zelle Email: sales.015@kpretservicellc.com</p> */}
             <p className="mb-1">Code: 326-651Y</p>
+            <p className="mb-1 text-sm text-red-600">Message or Memo: Please include this code in the message or memo field when send with Zelle</p>
 
 
 
