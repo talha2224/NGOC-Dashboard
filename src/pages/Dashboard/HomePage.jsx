@@ -3,12 +3,8 @@ import { useEffect, useState } from "react";
 import { MdArrowOutward, MdOutlineManageHistory, MdOutlineSync } from "react-icons/md";
 import config from "../../config";
 import { FaAngleRight, FaCopy } from "react-icons/fa";
-import { HiSpeakerphone } from "react-icons/hi";
-import Ads from '../../assets/dashboard/ads.svg'
 import { IoIosCash } from "react-icons/io";
 import { BiMoneyWithdraw } from "react-icons/bi";
-import { GoPackageDependencies } from "react-icons/go";
-import { SiCashapp } from "react-icons/si";
 import { FaUserTie } from "react-icons/fa";
 import { loadStripe } from "@stripe/stripe-js";
 import toast from "react-hot-toast";
@@ -21,7 +17,9 @@ const HomePage = () => {
   const [walletData, setWalletData] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [recieptData, setRecieptData] = useState([]);
+  const [taxData, settaxData] = useState(null);
   const [showReferModal, setShowReferModal] = useState(false);
+  
 
   // SEND STATES
   const [selectRecieptModel, setSelectRecieptModel] = useState(false);
@@ -35,6 +33,10 @@ const HomePage = () => {
 
   const fetchWalletInfo = async () => {
     let res = await axios.get(`${config.baseUrl}/wallet/user/${localStorage.getItem("uId")}`)
+    const tax = await axios.get(`${config.baseUrl}/tax/single`);
+    settaxData(tax?.data?.data)
+
+
     setWalletData(res?.data?.data)
   }
   const fetchProfileInfo = async () => {
@@ -69,8 +71,8 @@ const HomePage = () => {
     let loader = toast.loading("Processing Request")
     try {
       console.log(sendData.amount )
-      console.log((sendData.amount + (sendData.amount / 100) * 1.5))
-      let stripeRes = await axios.post(`https://ngoc-backend.vercel.app/create-checkout-session`, { amount:(sendData.amount + (sendData.amount / 100) * 1.5)})
+      console.log((sendData.amount + (sendData.amount / 100) * taxData?.value))
+      let stripeRes = await axios.post(`https://ngoc-backend.vercel.app/create-checkout-session`, { amount:(sendData.amount + (sendData.amount / 100) * taxData?.value)})
       let formData = new FormData()
       formData.append("userId", localStorage.getItem("uId"))
       formData.append("amount", sendData.amount)
@@ -304,7 +306,7 @@ const HomePage = () => {
               <p>Summary</p>
               <div className="flex justify-between items-center my-2">
                 <p>Fees</p>
-                <p>{((sendData.amount / 100) * 1.5).toFixed(2)} USD</p>
+                <p>{((sendData.amount / 100) * taxData?.value).toFixed(2)} USD</p>
               </div>
               {/* <div className="flex justify-between items-center">
                 <p>Fees Discount</p>
@@ -312,7 +314,7 @@ const HomePage = () => {
               </div> */}
               <div className="flex justify-between items-center my-2">
                 <p>Total Amount</p>
-                {sendData.amount} USD + ${((sendData.amount / 100) * 1.5).toFixed(2)} fees
+                {sendData.amount} USD + ${((sendData.amount / 100) * taxData?.value).toFixed(2)} fees
               </div>
             </div>
             <button onClick={() => { setSelectAmoutModel(false); setSelectDeliveryMethod(true) }} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Continue</button>

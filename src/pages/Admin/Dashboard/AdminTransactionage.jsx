@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import config from '../../../config';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, LineChart, Line, Tooltip } from 'recharts';
 import toast from 'react-hot-toast';
 
 
 const AdminTransactionage = () => {
 
     const [data, setData] = useState([]);
+    const [taxModel, setTaxModel] = useState(false);
+    const [taxData, settaxData] = useState(null);
+    const [value, setvalue] = useState(0)
 
     const fetchDashboardData = async () => {
         try {
             const totalUser = await axios.get(`${config.baseUrl}/transfer/all`);
+            const tax = await axios.get(`${config.baseUrl}/tax/single`);
             setData(totalUser?.data?.data);
+            settaxData(tax?.data?.data)
+            setvalue(tax?.data?.data?.value)
+
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -46,11 +52,27 @@ const AdminTransactionage = () => {
         }
     }
 
+    const updateTax = async (id) => {
+        let loader = toast.loading("Processing Request")
+        try {
+            const res = await axios.put(`${config.baseUrl}/tax/update/${taxData?._id}`,{value});
+            if (res?.data) {
+                toast.dismiss(loader)
+                toast.success("Tax Updated")
+                setTaxModel(false)
+                fetchDashboardData()
+            }
+        }
+        catch (error) {
+            toast.dismiss(loader)
+        }
+    }
+
     useEffect(() => {
         fetchDashboardData();
     }, []);
 
-    console.log(data, 'data')
+    console.log(taxData, 'taxData')
 
     return (
         <div>
@@ -62,6 +84,7 @@ const AdminTransactionage = () => {
                     <input type="text" placeholder="Search..." className="rounded-md bg-[#F9F9F9] px-3 w-[15rem] py-2 outline-none border" />
                 </div>
                 <div className="flex items-center space-x-2">
+                    <button onClick={() => setTaxModel(!taxModel)} className="bg-[#F2F2F2] rounded-md px-5 py-2 text-sm">Tax</button>
                     <button className="bg-[#F2F2F2] rounded-md px-5 py-2 text-sm">Sort</button>
                 </div>
             </div>
@@ -122,6 +145,22 @@ const AdminTransactionage = () => {
                     </tbody>
                 </table>
             </div>
+
+            {taxModel && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                    <div className="bg-white p-6 w-[20rem] rounded-lg relative">
+                        <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={()=>setTaxModel(!taxModel)} >
+                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <h2 className="text-lg font-semibold mb-4 text-center">Update Tax</h2>
+                        <input defaultValue={value} placeholder='Tax In Percentage' className="rounded-md px-5 w-[100%] py-2 text-sm border outline-none"  onChange={(e)=>setvalue(e?.target?.value)} type="number" name="" id="" />
+                        <button onClick={updateTax} className="bg-[#F2F2F2] rounded-md px-5 w-[100%] py-2 text-sm mt-2">Save</button>
+                    </div>
+                </div>
+            )}
+
 
 
 
