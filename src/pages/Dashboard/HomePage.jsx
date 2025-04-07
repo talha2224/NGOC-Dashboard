@@ -68,8 +68,9 @@ const HomePage = () => {
   const handleSendMoney = async (method) => {
     let loader = toast.loading("Processing Request")
     try {
-      console.log(sendData)
-      let stripeRes = await axios.post(`https://ngoc-backend.vercel.app/create-checkout-session`, { amount:(sendData.amount + (sendData.amount / 100) * 1.5).toFixed(2)})
+      console.log(sendData.amount )
+      console.log((sendData.amount + (sendData.amount / 100) * 1.5))
+      let stripeRes = await axios.post(`https://ngoc-backend.vercel.app/create-checkout-session`, { amount:(sendData.amount + (sendData.amount / 100) * 1.5)})
       let formData = new FormData()
       formData.append("userId", localStorage.getItem("uId"))
       formData.append("amount", sendData.amount)
@@ -86,6 +87,7 @@ const HomePage = () => {
           toast.dismiss(loader)
           window.location.href = stripeRes.data?.url;
         }
+        toast.dismiss(loader)
         toast.success("Payment Send Sucessfully")
         setRecieptDetailsModel(false)
 
@@ -95,9 +97,18 @@ const HomePage = () => {
 
     }
     catch (error) {
-
+      toast.dismiss(loader)
+      console.log(error)
     }
   }
+
+  function generateRandomCode() {
+    const part1 = Math.floor(100 + Math.random() * 900); // 100 - 999
+    const part2 = Math.floor(100 + Math.random() * 900); // 100 - 999
+    const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+    return `${part1}-${part2}${letter}`;
+  }
+  
 
 
   return (
@@ -137,7 +148,7 @@ const HomePage = () => {
           <FaAngleRight className="text-[#D1D1D1]" />
         </div>
 
-        <div className="mt-5 ml-1">
+        {/* <div className="mt-5 ml-1">
           <p className="font-medium">Pera Padala Promo</p>
           <p className="text-sm">Send 6 get 1 free service fee</p>
           <div className="bg-[#E3FAFF] md:w-[26.5rem] w-[100%] rounded-full px-2 py-3 mt-1 flex items-center gap-x-3">
@@ -149,7 +160,7 @@ const HomePage = () => {
         <div className="mt-5">
           <h1 className="text-xl font-semibold">Check this out</h1>
           <img src={Ads} alt="" className="mt-3" />
-        </div>
+        </div> */}
 
       </div>
 
@@ -193,13 +204,13 @@ const HomePage = () => {
 
         </div>
 
-        <div className="mt-5">
+        {/* <div className="mt-5">
 
           <h1 className="text-xl font-semibold">Know us more</h1>
 
           <iframe className="mt-5 rounded-2xl md:w-[26.5rem] w-[100%] " src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
 
-        </div>
+        </div> */}
 
 
       </div>
@@ -293,12 +304,12 @@ const HomePage = () => {
               <p>Summary</p>
               <div className="flex justify-between items-center my-2">
                 <p>Fees</p>
-                <p>4.00 USD</p>
+                <p>{((sendData.amount / 100) * 1.5).toFixed(2)} USD</p>
               </div>
-              <div className="flex justify-between items-center">
+              {/* <div className="flex justify-between items-center">
                 <p>Fees Discount</p>
                 <p>2.00 USD</p>
-              </div>
+              </div> */}
               <div className="flex justify-between items-center my-2">
                 <p>Total Amount</p>
                 {sendData.amount} USD + ${((sendData.amount / 100) * 1.5).toFixed(2)} fees
@@ -348,18 +359,18 @@ const HomePage = () => {
             </button>
 
 
-            <h2 className="mb-4">Reciept Details</h2>
+            <h2 className="mb-4">Receiver Details</h2>
 
 
             {
               sendData?.existingScript ?
                 <div>
 
-                  <input defaultValue={sendData?.name} disabled type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Reciept Name" />
-                  <input defaultValue={sendData?.email} disabled type="email" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Reciept Email" />
-                  <input defaultValue={sendData?.reciverCountry} disabled type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Reciept Country" />
-                  <input defaultValue={sendData?.reciverCity} disabled type="text" name="" id="" className=" cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Reciept City" />
-                  <input defaultValue={sendData?.reciverAccountNumber} disabled type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Reciept Account Number" />
+                  <input defaultValue={sendData?.name} disabled type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Name" />
+                  <input defaultValue={sendData?.email} disabled type="email" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Email" />
+                  <input defaultValue={sendData?.reciverCountry} disabled type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Country" />
+                  <input defaultValue={sendData?.reciverCity} disabled type="text" name="" id="" className=" cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver City" />
+                  <input defaultValue={sendData?.reciverAccountNumber} disabled type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Account Number" />
                 </div>
                 :
 
@@ -383,11 +394,10 @@ const HomePage = () => {
 
             <p className="text-center">Or</p>
 
-            <button onClick={() => handleSendMoney("zelle")} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Pay Via Zele</button>
+            <button onClick={() => handleSendMoney("zelle")} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Zelle to Zelle</button>
             <p className="mb-1">Zelle Phone: 7202264972</p>
             <p className="mb-1">Payablle To: Ngoc Anh Services</p>
-            {/* <p className="mb-1">Zelle Email: sales.015@kpretservicellc.com</p> */}
-            <p className="mb-1">Code: 326-651Y</p>
+            <p className="mb-1">Code: {generateRandomCode()}</p>
             <p className="mb-1 text-sm text-red-600">Message or Memo: Please include this code in the message or memo field when send with Zelle</p>
 
 
