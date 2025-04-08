@@ -19,15 +19,18 @@ const HomePage = () => {
   const [recieptData, setRecieptData] = useState([]);
   const [taxData, settaxData] = useState(null);
   const [showReferModal, setShowReferModal] = useState(false);
-  
+  const [vnd, setVnd] = useState(0);
+  const API_KEY = '8b6ba2ea7fc9003541618ea9';
+
 
   // SEND STATES
   const [selectRecieptModel, setSelectRecieptModel] = useState(false);
   const [selectAmoutModel, setSelectAmoutModel] = useState(false);
   const [selectDeliveryMethod, setSelectDeliveryMethod] = useState(false);
-  const [recieptDetailsModel, setRecieptDetailsModel] = useState(false)
+  const [recieptDetailsModel, setRecieptDetailsModel] = useState(false);
+  const [confirmationModel, setConfirmationModel] = useState(false)
 
-  const [sendData, setSendData] = useState({ amount: 0, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", reciverAddress: "", reciverPhone: "", name: "", email: "", existingScript: false,bankName:""})
+  const [sendData, setSendData] = useState({ amount: 0, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", reciverAddress: "", reciverPhone: "", name: "", email: "", existingScript: false, bankName: "" })
 
 
 
@@ -67,32 +70,31 @@ const HomePage = () => {
     setShowReferModal(false);
   };
 
-  const handleSendMoney = async (method) => {
+  const handleSendMoney = async () => {
     let loader = toast.loading("Processing Request")
     try {
-      console.log(sendData.amount )
+      console.log(sendData.amount)
       console.log((sendData.amount + (sendData.amount / 100) * taxData?.value))
-      let stripeRes = await axios.post(`https://ngoc-backend.vercel.app/create-checkout-session`, { amount:(sendData.amount + (sendData.amount / 100) * taxData?.value)})
+      let stripeRes = await axios.post(`https://ngoc-backend.vercel.app/create-checkout-session`, { amount: (sendData.amount + (sendData.amount / 100) * taxData?.value) })
       let formData = new FormData()
       formData.append("userId", localStorage.getItem("uId"))
       formData.append("amount", sendData.amount)
-      formData.append("paymentMethod", method)
+      formData.append("paymentMethod", sendData.paymentMethod)
       formData.append("deliveryMode", sendData.deliveryMode)
       formData.append("reciverAccountNumber", sendData.reciverAccountNumber)
       formData.append("reciverCity", sendData.reciverCity)
       formData.append("reciverCountry", sendData.reciverCountry)
-      formData.append("reciverOtherInfo", JSON.stringify({ name: sendData.name, email: sendData.email,bankName:sendData?.bankName,address:sendData.reciverAddress,phone:sendData.reciverPhone }));
+      formData.append("reciverOtherInfo", JSON.stringify({ name: sendData.name, email: sendData.email, bankName: sendData?.bankName, address: sendData.reciverAddress, phone: sendData.reciverPhone }));
 
       let res = await axios.post(`${config.baseUrl}/transfer/create`, formData)
       if (res.data) {
-        if (res.data && method === "stripe") {
+        if (res.data && sendData.paymentMethod === "card") {
           toast.dismiss(loader)
           window.location.href = stripeRes.data?.url;
         }
         toast.dismiss(loader)
         toast.success("Payment Send Sucessfully")
-        setRecieptDetailsModel(false)
-
+        setConfirmationModel(false)
       }
 
 
@@ -110,7 +112,27 @@ const HomePage = () => {
     const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
     return `${part1}-${part2}${letter}`;
   }
-  
+
+  useEffect(() => {
+    const fetchRate = async () => {
+      try {
+        const response = await axios.get(
+          `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/USD`
+        );
+        console.log(response?.data)
+        const rate = response.data.conversion_rates.VND;
+        console.log(typeof sendData.amount, sendData.amount, 'sendData.amount')
+        // setVnd((((sendData.amount / 100) * taxData?.value) * rate).toFixed(2));
+        setVnd((sendData.amount * rate).toFixed(2));
+      }
+      catch (error) {
+        console.error("Error fetching exchange rate", error);
+      }
+    };
+
+    fetchRate();
+  }, [sendData]);
+
 
 
   return (
@@ -305,16 +327,16 @@ const HomePage = () => {
             <div className="bg-[#E3FAFF] text-sm p-2 rounded-md">
               <p>Summary</p>
               <div className="flex justify-between items-center my-2">
-                <p>Fees</p>
-                <p>{((sendData.amount / 100) * taxData?.value).toFixed(2)} USD</p>
+                <p className=" text-sm">Fees</p>
+                <p className=" text-sm">{((sendData.amount / 100) * taxData?.value).toFixed(2)} USD</p>
               </div>
-              {/* <div className="flex justify-between items-center">
-                <p>Fees Discount</p>
-                <p>2.00 USD</p>
-              </div> */}
               <div className="flex justify-between items-center my-2">
-                <p>Total Amount</p>
+                <p className=" text-sm">Total Amount</p>
                 {sendData.amount} USD + ${((sendData.amount / 100) * taxData?.value).toFixed(2)} fees
+              </div>
+              <div className="flex justify-between items-center my-2">
+                <p className=" text-sm">Total Amount Received IN VND</p>
+                <p className=" text-sm">{vnd}</p>
               </div>
             </div>
             <button onClick={() => { setSelectAmoutModel(false); setSelectDeliveryMethod(true) }} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Continue</button>
@@ -381,9 +403,9 @@ const HomePage = () => {
                   <input onChange={(e) => { setSendData({ ...sendData, email: e.target.value }) }} type="email" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Email" />
                   <input onChange={(e) => { setSendData({ ...sendData, reciverCountry: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Country" />
                   <input onChange={(e) => { setSendData({ ...sendData, reciverCity: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver City" />
-                  {sendData?.deliveryMode =="Bank Deposit" && <input onChange={(e) => { setSendData({ ...sendData, bankName: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Bank Name" />}
-                  {sendData?.deliveryMode =="Home Delivery" && <input onChange={(e) => { setSendData({ ...sendData, reciverAddress: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Receiver Address" />}
-                  {sendData?.deliveryMode =="Home Delivery" && <input onChange={(e) => { setSendData({ ...sendData, reciverPhone: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Receiver Phone Number" />}
+                  {sendData?.deliveryMode == "Bank Deposit" && <input onChange={(e) => { setSendData({ ...sendData, bankName: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Bank Name" />}
+                  {sendData?.deliveryMode == "Home Delivery" && <input onChange={(e) => { setSendData({ ...sendData, reciverAddress: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Receiver Address" />}
+                  {sendData?.deliveryMode == "Home Delivery" && <input onChange={(e) => { setSendData({ ...sendData, reciverPhone: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Receiver Phone Number" />}
 
                   <input onChange={(e) => { setSendData({ ...sendData, reciverAccountNumber: e.target.value }) }} type="text" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Account Number" />
                 </div>
@@ -391,16 +413,99 @@ const HomePage = () => {
 
 
 
-            <button onClick={() => handleSendMoney("stripe")} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Pay Via Card</button>
+            <button onClick={() => { setSendData({ ...sendData, paymentMethod: "card" }); setRecieptDetailsModel(false); setConfirmationModel(!confirmationModel) }} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Pay Via Card</button>
 
 
             <p className="text-center">Or</p>
 
-            <button onClick={() => handleSendMoney("zelle")} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Zelle to Zelle</button>
+            <button onClick={() => { setSendData({ ...sendData, paymentMethod: "zelle" }); setRecieptDetailsModel(false); setConfirmationModel(!confirmationModel) }} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Zelle to Zelle</button>
             <p className="mb-1">Zelle Phone: 7202264972</p>
             <p className="mb-1">Payablle To: Ngoc Anh Services</p>
             <p className="mb-1">Code: {generateRandomCode()}</p>
             <p className="mb-1 text-sm text-red-600">Message or Memo: Please include this code in the message or memo field when send with Zelle</p>
+
+
+
+          </div>
+        </div>
+      )}
+
+      {confirmationModel && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 max-h-[89vh] overflow-y-auto w-[25rem] rounded-lg relative">
+
+
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => setConfirmationModel(false)} >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+
+            <h2 className="mb-4">Summary</h2>
+
+
+            {
+              sendData?.existingScript ?
+                <div>
+
+                  <input defaultValue={sendData?.name} disabled type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Name" />
+                  <input defaultValue={sendData?.email} disabled type="email" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Email" />
+                  <input defaultValue={sendData?.reciverCountry} disabled type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Country" />
+                  <input defaultValue={sendData?.reciverCity} disabled type="text" name="" id="" className=" cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver City" />
+                  <input defaultValue={sendData?.reciverAccountNumber} disabled type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Account Number" />
+                </div>
+                :
+
+                <div>
+                  <input defaultValue={sendData?.name} onChange={(e) => { setSendData({ ...sendData, name: e.target.value }) }} type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Name" />
+                  <input defaultValue={sendData?.email} onChange={(e) => { setSendData({ ...sendData, email: e.target.value }) }} type="email" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Email" />
+                  <input defaultValue={sendData?.reciverCountry} onChange={(e) => { setSendData({ ...sendData, reciverCountry: e.target.value }) }} type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Country" />
+                  <input defaultValue={sendData?.reciverCity} onChange={(e) => { setSendData({ ...sendData, reciverCity: e.target.value }) }} type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver City" />
+                  {sendData?.deliveryMode == "Bank Deposit" && <input defaultValue={sendData?.bankName} onChange={(e) => { setSendData({ ...sendData, bankName: e.target.value }) }} type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Bank Name" />}
+                  {sendData?.deliveryMode == "Home Delivery" && <input defaultValue={sendData?.reciverAddress} onChange={(e) => { setSendData({ ...sendData, reciverAddress: e.target.value }) }} type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Receiver Address" />}
+                  {sendData?.deliveryMode == "Home Delivery" && <input defaultValue={sendData?.reciverPhone} onChange={(e) => { setSendData({ ...sendData, reciverPhone: e.target.value }) }} type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Receiver Phone Number" />}
+                  <input onChange={(e) => { setSendData({ ...sendData, reciverAccountNumber: e.target.value }) }} defaultValue={sendData?.reciverAccountNumber} type="text" name="" id="" className="cursor-not-allowed w-[100%] h-[2.5rem] rounded-md border mt-2 px-3 outline-none" placeholder="Enter Receiver Account Number" />
+                </div>
+            }
+
+            <div className="bg-[#E3FAFF] text-sm p-2 rounded-md mt-2">
+              <p>Summary</p>
+              <div className="flex justify-between items-center my-2">
+                <p>Fees</p>
+                {
+                  sendData.paymentMethod !== "card" ? (<p>{((sendData.amount / 100) * taxData?.value).toFixed(2)} USD</p>)
+                    :
+                    (<p>{((sendData.amount / 100) * 4).toFixed(2)} USD</p>)
+                }
+              </div>
+              {
+                sendData.paymentMethod !== "card" ?
+                  <div className="flex justify-between items-center my-2">
+                    <p>Total Amount</p>
+                    {sendData.amount} USD + ${((sendData.amount / 100) * taxData?.value).toFixed(2)} fees
+                  </div>
+                  :
+                  <div className="flex justify-between items-center my-2">
+                    <p>Total Amount</p>
+                    {sendData.amount} USD + ${((sendData.amount / 100) * 4).toFixed(2)} fees
+                  </div>
+              }
+              <div className="flex justify-between items-center my-2">
+                <p className=" text-sm">Total Amount Received IN VND</p>
+                <p className=" text-sm">{vnd}</p>
+              </div>
+            </div>
+            <button onClick={handleSendMoney} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Pay Now</button>
+            {
+              sendData.paymentMethod !== "card" && (
+                <div>
+                  <p className="mb-1 text-sm">Zelle instruction: Please send “ total amount with fees”  to this zelle after you done with the transaction. <br />  Zelle phone : 7202264972 <br />  Payable to : Ngoc Anh Services</p>
+                  <p className="mb-1 text-sm">Code: {generateRandomCode()}</p>
+                  <p className="mb-1 text-sm text-red-600">Message or Memo: Please include this code in the message or memo field when send with Zelle. Your money will not be sent before Zelle is received.</p>
+                </div>
+              )
+            }
 
 
 
