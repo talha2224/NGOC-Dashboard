@@ -32,7 +32,28 @@ const HomePage = () => {
 
   const [sendData, setSendData] = useState({ amount:1, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", reciverAddress: "", reciverPhone: "", name: "", email: "", existingScript: false, bankName: "" })
 
+  const handleAmountChange = (e) => {
+    const value = e.target.value;
+    const min = 1;
+    const max = 2900;
 
+    // Allow empty input
+    if (value === '') {
+      setSendData({ ...sendData, amount: value });
+      return;
+    }
+
+    const parsedValue = parseInt(value, 10);
+
+    // Check if the parsed value is a valid number and within the range
+    if (!isNaN(parsedValue) && parsedValue >= min && parsedValue <= max) {
+      setSendData({ ...sendData, amount: value });
+    }
+    // Optionally, you can provide visual feedback if the input is invalid
+    // else {
+    //   console.log("Input out of range");
+    // }
+  };
 
   const fetchWalletInfo = async () => {
     let res = await axios.get(`${config.baseUrl}/wallet/user/${localStorage.getItem("uId")}`)
@@ -321,7 +342,7 @@ const HomePage = () => {
             </button>
             <h2 className="mb-4">Enter Amount In USD</h2>
             <h2 className="">You Send</h2>
-            <input min="1" max="2900" onChange={(e) => { setSendData({ ...sendData, amount: parseInt(e.target.value) }) }} value={sendData?.amount} type="number" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border my-2 px-3 outline-none" placeholder="Enter Amount In USD" />
+            <input min="1" max="2900" onChange={handleAmountChange} value={sendData?.amount} type="number" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border my-2 px-3 outline-none" placeholder="Enter Amount In USD" />
             <h2 className="">They Recieve</h2>
             <input disabled type="number" value={sendData.amount} name="" id="" className="w-[100%] h-[2.5rem] rounded-md border my-2 px-3 disabled:" placeholder="Enter Amount In USD" />
             <div className="bg-[#E3FAFF] text-sm p-2 rounded-md">
