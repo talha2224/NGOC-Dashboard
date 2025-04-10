@@ -321,7 +321,7 @@ const HomePage = () => {
             </button>
             <h2 className="mb-4">Enter Amount In USD</h2>
             <h2 className="">You Send</h2>
-            <input min={"1"} max={"2900"} onChange={(e) => { setSendData({ ...sendData, amount: e.target.value }) }} type="number" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border my-2 px-3 outline-none" placeholder="Enter Amount In USD" />
+            <input min="1" max="2900" onChange={(e) => { setSendData({ ...sendData, amount: parseInt(e.target.value) }) }} type="number" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border my-2 px-3 outline-none" placeholder="Enter Amount In USD" />
             <h2 className="">They Recieve</h2>
             <input disabled type="number" value={sendData.amount} name="" id="" className="w-[100%] h-[2.5rem] rounded-md border my-2 px-3 disabled:" placeholder="Enter Amount In USD" />
             <div className="bg-[#E3FAFF] text-sm p-2 rounded-md">
