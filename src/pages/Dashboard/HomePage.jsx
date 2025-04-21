@@ -382,7 +382,7 @@ const HomePage = () => {
                 {sendData.amount} {sendData.currency} + {sendData.currency == "VND" ? "₫" : "$"} {((sendData.amount / 100) * taxData?.value).toFixed(2)} fees
               </div>
               <div className="flex justify-between items-center my-2">
-                <p className="text-sm">Total Amount Received In {sendData.currency}</p>
+                <p className="text-sm">Total Amount Received In {"VND"}</p>
                 <p className="text-sm">{sendData.currency == "VND" ? sendData?.amount : vnd}</p>
               </div>
             </div>
