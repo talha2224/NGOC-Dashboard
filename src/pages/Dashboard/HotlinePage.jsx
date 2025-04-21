@@ -43,18 +43,20 @@ const HotlinePage = () => {
                     <div>
                         <p className='text-sm text-gray-600'>Our Email Address</p>
                         <div className='bg-gray-100 rounded-lg p-3 flex items-center justify-between'>
-                            <p>{hotlineData?.email}</p>
+                            {/* <p>{hotlineData?.email}</p> */}
+                            <p>ntnghia00@yahoo.com</p>
                             <FaAngleRight className='text-gray-400' />
                         </div>
                     </div>
                     <div>
                         <p className='text-sm text-gray-600'>PH Landline</p>
-                        <div className='bg-gray-100 rounded-lg p-3 flex items-center justify-between cursor-pointer' onClick={() => setShowPhLandlineModal(true)}>
-                            <p className=''>{phLandlineData.length > 0 ? phLandlineData[0] : 'No Data'}</p>
+                        <div className='bg-gray-100 rounded-lg p-3 flex items-center justify-between cursor-pointer'>
+                            {/* <p className=''>{phLandlineData.length > 0 ? phLandlineData[0] : 'No Data'}</p> */}
+                            <p>720-597-7777</p>
                             <FaAngleRight className='text-gray-400' />
                         </div>
                     </div>
-                    <div>
+                    {/* <div>
                         <p className='text-sm text-gray-600'>Branches</p>
                         <div className='bg-gray-100 rounded-lg p-3 flex items-center justify-between cursor-pointer' onClick={() => setShowBranchesModal(true)}>
                             <p  >Our branches</p>
@@ -74,7 +76,7 @@ const HotlinePage = () => {
                             <p  >PH customer services</p>
                             <FaAngleRight className='text-gray-400' />
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </div>
 

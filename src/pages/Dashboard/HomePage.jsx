@@ -8,9 +8,16 @@ import { BiMoneyWithdraw } from "react-icons/bi";
 import { FaUserTie } from "react-icons/fa";
 import { loadStripe } from "@stripe/stripe-js";
 import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
+import { data, Link, useLocation, useNavigate } from "react-router-dom";
+import { TiTick } from "react-icons/ti";
 
 loadStripe("pk_test_51OjJpTASyMRcymO6x2PBK1nrHChycNMNXj7HHvTRffOp5xufCj3WRSCLoep1tGp5Ilx3IWj7ck5yqrwEH8VSRKn80055Kvyelu");
+const generateRandomCode=()=>{
+  const part1 = Math.floor(100 + Math.random() * 900); // 100 - 999
+  const part2 = Math.floor(100 + Math.random() * 900); // 100 - 999
+  const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  return `${part1}-${part2}${letter}`;
+}
 
 const HomePage = () => {
 
@@ -30,7 +37,7 @@ const HomePage = () => {
   const [recieptDetailsModel, setRecieptDetailsModel] = useState(false);
   const [confirmationModel, setConfirmationModel] = useState(false)
 
-  const [sendData, setSendData] = useState({ amount:1, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", reciverAddress: "", reciverPhone: "", name: "", email: "", existingScript: false, bankName: "" })
+  const [sendData, setSendData] = useState({code:generateRandomCode(),amount: 1, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", reciverAddress: "", reciverPhone: "", name: "", email: "", existingScript: false, bankName: "" })
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
@@ -105,7 +112,7 @@ const HomePage = () => {
       formData.append("reciverAccountNumber", sendData.reciverAccountNumber)
       formData.append("reciverCity", sendData.reciverCity)
       formData.append("reciverCountry", sendData.reciverCountry)
-      formData.append("reciverOtherInfo", JSON.stringify({ name: sendData.name, email: sendData.email, bankName: sendData?.bankName, address: sendData.reciverAddress, phone: sendData.reciverPhone }));
+      formData.append("reciverOtherInfo", JSON.stringify({ name: sendData.name, email: sendData.email, bankName: sendData?.bankName, address: sendData.reciverAddress, phone: sendData.reciverPhone,code:sendData?.code}));
 
       let res = await axios.post(`${config.baseUrl}/transfer/create`, formData)
       if (res.data) {
@@ -127,12 +134,6 @@ const HomePage = () => {
     }
   }
 
-  function generateRandomCode() {
-    const part1 = Math.floor(100 + Math.random() * 900); // 100 - 999
-    const part2 = Math.floor(100 + Math.random() * 900); // 100 - 999
-    const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-    return `${part1}-${part2}${letter}`;
-  }
 
   useEffect(() => {
     const fetchRate = async () => {
@@ -153,6 +154,22 @@ const HomePage = () => {
 
     fetchRate();
   }, [sendData]);
+
+  const location = useLocation();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [status, setStatus] = useState(""); // 'success' or 'failed'
+  const nav = useNavigate()
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const query = queryParams.get("query");
+
+    if (query === "success" || query === "failed") {
+      setStatus(query);
+      setModalOpen(true);
+    }
+  }, [location]);
+
+
 
 
 
@@ -335,35 +352,48 @@ const HomePage = () => {
       {selectAmoutModel && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 w-[25rem] rounded-lg relative">
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => setSelectAmoutModel(false)} >
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => setSelectAmoutModel(false)}>
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <h2 className="mb-4">Enter Amount In USD</h2>
+            <h2 className="mt-4">Select Currency</h2>
+            <select value={sendData.currency} onChange={(e) => setSendData({ ...sendData, currency: e.target.value })} className="w-full h-[2.5rem] rounded-md border my-2 px-3 outline-none">
+              <option value="VND">VND</option>
+              <option value="USD">USD</option>
+            </select>
+            <h2 className="mb-4">Enter Amount In {sendData.currency}</h2>
+
             <h2 className="">You Send</h2>
-            <input min="1" max="2900" onChange={handleAmountChange} value={sendData?.amount} type="number" name="" id="" className="w-[100%] h-[2.5rem] rounded-md border my-2 px-3 outline-none" placeholder="Enter Amount In USD" />
-            <h2 className="">They Recieve</h2>
-            <input disabled type="number" value={sendData.amount} name="" id="" className="w-[100%] h-[2.5rem] rounded-md border my-2 px-3 disabled:" placeholder="Enter Amount In USD" />
+            <input min="1" max="2900" onChange={handleAmountChange} value={sendData?.amount} type="number" className="w-full h-[2.5rem] rounded-md border my-2 px-3 outline-none" placeholder={`Enter Amount In ${sendData.currency}`} />
+
+
+            <h2 className="">They Receive</h2>
+            <input disabledtype="number" value={sendData.amount} className="w-full h-[2.5rem] rounded-md border my-2 px-3 outline-none" placeholder="Enter Amount" />
+
             <div className="bg-[#E3FAFF] text-sm p-2 rounded-md">
               <p>Summary</p>
               <div className="flex justify-between items-center my-2">
-                <p className=" text-sm">Fees</p>
-                <p className=" text-sm">{((sendData.amount / 100) * taxData?.value).toFixed(2)} USD</p>
+                <p className="text-sm">Fees</p>
+                <p className="text-sm">{((sendData.amount / 100) * taxData?.value).toFixed(2)} USD</p>
               </div>
               <div className="flex justify-between items-center my-2">
-                <p className=" text-sm">Total Amount</p>
-                {sendData.amount} USD + ${((sendData.amount / 100) * taxData?.value).toFixed(2)} fees
+                <p className="text-sm">Total Amount</p>
+                {sendData.amount} {sendData.currency} + {sendData.currency == "VND" ? "₫" : "$"} {((sendData.amount / 100) * taxData?.value).toFixed(2)} fees
               </div>
               <div className="flex justify-between items-center my-2">
-                <p className=" text-sm">Total Amount Received IN VND</p>
-                <p className=" text-sm">{vnd}</p>
+                <p className="text-sm">Total Amount Received In {sendData.currency}</p>
+                <p className="text-sm">{sendData.currency == "VND" ? sendData?.amount : vnd}</p>
               </div>
             </div>
-            <button onClick={() => { setSelectAmoutModel(false); setSelectDeliveryMethod(true) }} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Continue</button>
+
+            <button onClick={() => { setSelectAmoutModel(false); setSelectDeliveryMethod(true); }} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-full">
+              Continue
+            </button>
           </div>
         </div>
       )}
+
 
       {selectDeliveryMethod && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -382,8 +412,8 @@ const HomePage = () => {
             <button onClick={() => { setSendData({ ...sendData, deliveryMode: "Bank Deposit" }) }} className={`w-[100%] px-3 py-2 mb-2 rounded-md ${sendData?.deliveryMode == "Bank Deposit" ? "bg-[#E3FAFF]" : "border"}`}>Bank Deposit</button>
             <button onClick={() => { setSendData({ ...sendData, deliveryMode: "Home Delivery" }) }} className={`w-[100%] px-3 py-2 mb-2 rounded-md ${sendData?.deliveryMode == "Home Delivery" ? "bg-[#E3FAFF]" : "border"}`}>Home Delivery</button>
             <button onClick={() => { setSendData({ ...sendData, deliveryMode: "Cash Pickup" }) }} className={`w-[100%] px-3 py-2 mb-2 rounded-md ${sendData?.deliveryMode == "Cash Pickup" ? "bg-[#E3FAFF]" : "border"}`}>Cash Pickup</button>
-            <button onClick={() => { setSendData({ ...sendData, deliveryMode: "Mobile Money" }) }} className={`w-[100%] px-3 py-2 mb-2 rounded-md ${sendData?.deliveryMode == "Mobile Money" ? "bg-[#E3FAFF]" : "border"}`}>Mobile Money</button>
-            <button onClick={() => { setSendData({ ...sendData, deliveryMode: "Debit Card Deposit" }) }} className={`w-[100%] px-3 py-2 mb-2 rounded-md ${sendData?.deliveryMode == "Debit Card Deposit" ? "bg-[#E3FAFF]" : "border"}`}>Debit Card Deposit</button>
+            {/* <button onClick={() => { setSendData({ ...sendData, deliveryMode: "Mobile Money" }) }} className={`w-[100%] px-3 py-2 mb-2 rounded-md ${sendData?.deliveryMode == "Mobile Money" ? "bg-[#E3FAFF]" : "border"}`}>Mobile Money</button> */}
+            {/* <button onClick={() => { setSendData({ ...sendData, deliveryMode: "Debit Card Deposit" }) }} className={`w-[100%] px-3 py-2 mb-2 rounded-md ${sendData?.deliveryMode == "Debit Card Deposit" ? "bg-[#E3FAFF]" : "border"}`}>Debit Card Deposit</button> */}
 
 
             <button onClick={() => { setRecieptDetailsModel(true); setSelectDeliveryMethod(false) }} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Continue</button>
@@ -442,7 +472,7 @@ const HomePage = () => {
             <button onClick={() => { setSendData({ ...sendData, paymentMethod: "zelle" }); setRecieptDetailsModel(false); setConfirmationModel(!confirmationModel) }} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">Zelle to Zelle</button>
             <p className="mb-1">Zelle Phone: 7202264972</p>
             <p className="mb-1">Payablle To: Ngoc Anh Services</p>
-            <p className="mb-1">Code: {generateRandomCode()}</p>
+            <p className="mb-1">Code: {sendData?.code}</p>
             <p className="mb-1 text-sm text-red-600">Message or Memo: Please include this code in the message or memo field when send with Zelle</p>
 
 
@@ -522,11 +552,38 @@ const HomePage = () => {
               sendData.paymentMethod !== "card" && (
                 <div>
                   <p className="mb-1 text-sm">Zelle instruction: Please send “ total amount with fees”  to this zelle after you done with the transaction. <br />  Zelle phone : 7202264972 <br />  Payable to : Ngoc Anh Services</p>
-                  <p className="mb-1 text-sm">Code: {generateRandomCode()}</p>
+                  <p className="mb-1 text-sm">Code: {sendData?.code}</p>
                   <p className="mb-1 text-sm text-red-600">Message or Memo: Please include this code in the message or memo field when send with Zelle. Your money will not be sent before Zelle is received.</p>
                 </div>
               )
             }
+
+
+
+          </div>
+        </div>
+      )}
+
+
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 max-h-[89vh] overflow-y-auto w-[25rem] rounded-lg relative">
+
+
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => setModalOpen(false)} >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="flex justify-center items-center my-5 flex-col">
+              <div className={`w-[5rem] h-[5rem] rounded-full ${status == "success" ? "bg-green-600" : "bg-red-600"} flex justify-center items-center`}>
+                {status=="success"?<TiTick className="text-white text-[2.5rem]" />:<svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>}
+              </div>
+              <h2 className="mt-4">Transaction {status == "success" ? "Successful" : "Failed"}</h2>
+            </div>
+
+            <button onClick={() => nav("/dashboard/wallet")} className="bg-[#E3FAFF] text-sm p-2 rounded-md my-2 w-[100%]">View Transaction History</button>
 
 
 

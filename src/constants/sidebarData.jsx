@@ -14,7 +14,7 @@ export const navData = [
     {
         id: 7,
         link: "hotline",
-        name: "HotLine",
+        name: "Contact Us",
         icon: <IoCall   />
     }
 ];

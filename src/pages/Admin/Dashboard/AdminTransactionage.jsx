@@ -55,7 +55,7 @@ const AdminTransactionage = () => {
     const updateTax = async (id) => {
         let loader = toast.loading("Processing Request")
         try {
-            const res = await axios.put(`${config.baseUrl}/tax/update/${taxData?._id}`,{value});
+            const res = await axios.put(`${config.baseUrl}/tax/update/${taxData?._id}`, { value });
             if (res?.data) {
                 toast.dismiss(loader)
                 toast.success("Tax Updated")
@@ -68,11 +68,25 @@ const AdminTransactionage = () => {
         }
     }
 
+    const downloadData = (logData, id) => {
+        const fileData = JSON.stringify(logData, null, 2);
+        const blob = new Blob([fileData], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `transaction-${id}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+
     useEffect(() => {
         fetchDashboardData();
     }, []);
 
-    console.log(taxData, 'taxData')
 
     return (
         <div>
@@ -126,7 +140,7 @@ const AdminTransactionage = () => {
                                     <span className={`px-2 py-1 rounded-md text-xs text-nowrap ${i.decline ? 'bg-red-200 text-red-700' : 'bg-[#DCEDFF] text-[#007AFF]'}`}>{(i.decline && !i?.approved) ? 'Decline' : i?.approved ? "Approved" : 'Pending'}</span>
                                 </td>
                                 <td className="py-2 px-4 border-b flex gap-x-3">
-
+                                    <button onClick={() => { downloadData(i, i?._id) }} className='text-xs bg-[#EBF2ED] text-black  px-3 py-1 rounded-md'>Download</button>
                                     {
                                         (!i?.decline && !i?.approved) ?
                                             <div className='flex gap-x-3'>
@@ -149,13 +163,13 @@ const AdminTransactionage = () => {
             {taxModel && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
                     <div className="bg-white p-6 w-[20rem] rounded-lg relative">
-                        <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={()=>setTaxModel(!taxModel)} >
+                        <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => setTaxModel(!taxModel)} >
                             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                         <h2 className="text-lg font-semibold mb-4 text-center">Update Tax</h2>
-                        <input defaultValue={value} placeholder='Tax In Percentage' className="rounded-md px-5 w-[100%] py-2 text-sm border outline-none"  onChange={(e)=>setvalue(e?.target?.value)} type="number" name="" id="" />
+                        <input defaultValue={value} placeholder='Tax In Percentage' className="rounded-md px-5 w-[100%] py-2 text-sm border outline-none" onChange={(e) => setvalue(e?.target?.value)} type="number" name="" id="" />
                         <button onClick={updateTax} className="bg-[#F2F2F2] rounded-md px-5 w-[100%] py-2 text-sm mt-2">Save</button>
                     </div>
                 </div>
