@@ -117,6 +117,7 @@ const HomePage = () => {
 
       let res = await axios.post(`${config.baseUrl}/transfer/create`, formData)
       if (res.data) {
+        setSendData({code:generateRandomCode(),amount: 1, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", reciverAddress: "", reciverPhone: "", name: "", email: "", existingScript: false, bankName: "" })
         if (res.data && sendData.paymentMethod === "card") {
           toast.dismiss(loader)
           window.location.href = stripeRes.data?.url;
