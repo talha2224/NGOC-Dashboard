@@ -96,6 +96,7 @@ const HomePage = () => {
 
   const handleCloseModal = () => {
     setShowReferModal(false);
+    setSendData({code:generateRandomCode(),amount: 1, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", reciverAddress: "", reciverPhone: "", name: "", email: "", existingScript: false, bankName: "" })
   };
 
   const handleSendMoney = async () => {
@@ -311,7 +312,7 @@ const HomePage = () => {
       {selectRecieptModel && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 w-[20rem] rounded-lg relative">
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => setSelectRecieptModel(false)} >
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => {setSelectRecieptModel(false);setSendData({code:generateRandomCode(),amount: 1, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", reciverAddress: "", reciverPhone: "", name: "", email: "", existingScript: false, bankName: "" })}} >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -352,7 +353,7 @@ const HomePage = () => {
       {selectAmoutModel && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 w-[25rem] rounded-lg relative">
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => setSelectAmoutModel(false)}>
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => {setSelectAmoutModel(false);setSendData({code:generateRandomCode(),amount: 1, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", reciverAddress: "", reciverPhone: "", name: "", email: "", existingScript: false, bankName: "" })}}>
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -400,7 +401,7 @@ const HomePage = () => {
           <div className="bg-white p-6 w-[25rem] rounded-lg relative">
 
 
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => setSelectDeliveryMethod(false)} >
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => {setSelectDeliveryMethod(false);setSendData({code:generateRandomCode(),amount: 1, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", reciverAddress: "", reciverPhone: "", name: "", email: "", existingScript: false, bankName: "" })}} >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -427,7 +428,7 @@ const HomePage = () => {
           <div className="bg-white p-6 w-[25rem] rounded-lg relative">
 
 
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => setRecieptDetailsModel(false)} >
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => {setRecieptDetailsModel(false);setSendData({code:generateRandomCode(),amount: 1, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", reciverAddress: "", reciverPhone: "", name: "", email: "", existingScript: false, bankName: "" })}} >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -486,7 +487,7 @@ const HomePage = () => {
           <div className="bg-white p-6 max-h-[89vh] overflow-y-auto w-[25rem] rounded-lg relative">
 
 
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => setConfirmationModel(false)} >
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => {setConfirmationModel(false);setSendData({code:generateRandomCode(),amount: 1, paymentMethod: "", deliveryMode: "", reciverAccountNumber: "", reciverCountry: "", reciverCity: "", reciverAddress: "", reciverPhone: "", name: "", email: "", existingScript: false, bankName: "" })}} >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
