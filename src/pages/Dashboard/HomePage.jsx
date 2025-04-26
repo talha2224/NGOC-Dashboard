@@ -124,7 +124,7 @@ const HomePage = () => {
         }
         toast.dismiss(loader)
         toast.success("Payment Send Sucessfully")
-        setConfirmationModel(true)
+        setConfirmationModel(false)
       }
 
 
