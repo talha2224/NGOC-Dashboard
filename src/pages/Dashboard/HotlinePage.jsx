@@ -36,7 +36,7 @@ const HotlinePage = () => {
     return (
         <div className='flex-1 overflow-x-auto'>
             <div>
-                <h2 className='text-2xl mb-2'>Hotline</h2>
+                <h2 className='text-2xl mb-2'>Contact Us</h2>
                 <p className='text-gray-600 mb-6'>Sed ut perspiciatis unde omnis iste</p>
 
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
